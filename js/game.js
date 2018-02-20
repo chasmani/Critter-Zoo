@@ -32,16 +32,41 @@ function button(event, text, delay){
 	setTimeout(function(){ $("#game-controls-section").prepend($('<button class="btn btn-default" onclick="' + event + '">' + text + '</button>').fadeIn('slow'));	 }, delay);
 }
 
-function Critter(type) {
+function Critter(type, name) {
 
 	this.type = type;
+	this.name = name;
+	this.id = "critter-1";
 
 }
 
 function Enclosure(type) {
 
 	this.type = type;
-	this.id = "enc-1"
+	this.id = "enc-1";
+
+	this.critters = [];
+
+	this.addCritter = function(critter) {
+		this.critters.push(critter);
+	}
+
+	this.showCritters = function() {
+
+		for (i=0; i<this.critters.length; i++){ 
+
+			// If not already there
+
+			var critterElement = 	'<div class="well" id="' + this.critters[i].id +'">' + 
+						  			this.critters[i].name + ' - ' + this.critters[i].type +
+									'</div>'
+
+			$('#' + this.id + " .panel-body").prepend($(critterElement).fadeIn('slow'));	
+		}
+
+
+		
+	}
 
 }
 
@@ -57,22 +82,29 @@ function introduction(){
 	message("info", "During the tale, you hear a noise coming from Uncle Jeoffrey's bag and look over at it",20000);
 	message("success", '"Oh yes!" he says, "I have a present for you',23000);
 
-	button("openPresent(event)", "Open Present", 1);
+	button("openPresent(event)", "Open Present", 23000);
 }
 
 
 
 function openPresent(event) {
 
-	console.log(event);
-	$(event.target).addClass("hidden");
+	// Hide the button
+	$(event.target).remove();
 
-	console.log("Opening Present");
-	mouse = new Critter("Mice");
-	critters.push(mouse);
-
+	// Add a basic cage
 	basicCage = new Enclosure("Basic Cage");
 	enclosures.push(basicCage);
+	message("success", "You got a basic cage. Alright!");
+
+	// Add a mouse to the basic cage
+	console.log("Opening Present");
+	mouse = new Critter("Mouse", "Moriarty");
+	critters.push(mouse);
+
+	message("success", "You got your first Critter! A mouse called Moriarty!")
+
+	basicCage.addCritter(mouse);
 
 	updateView();
 }
@@ -82,13 +114,16 @@ function showEnclosure(enclosure){
 
 	// Only show if not already in it
 	if($('#' + enclosure.id).length==0){
-		var enclosureElement = '<div class="panel panel-default enclosure" id="' + enclosure.id +'">' + 
-  		'<div class="panel-heading">' + enclosure.type + '</div>' +
-  		'<div class="panel-body"></div>' +
-		'</div>'
+		var enclosureElement = 	'<div class="panel panel-primary enclosure" id="' + enclosure.id +'">' + 
+						  		'<div class="panel-heading">' + enclosure.type + '</div>' +
+						  		'<div class="panel-body"></div>' +
+								'</div>'
 
 		$("#game-enclosures-section").prepend($(enclosureElement).fadeIn('slow'));	
-	}	
+	}
+
+
+
 }
 
 
@@ -98,6 +133,8 @@ function updateView() {
 	for (i=0; i<enclosures.length; i++){
 
 		showEnclosure(enclosures[i])
+
+		enclosures[i].showCritters();
 
 	}
 
